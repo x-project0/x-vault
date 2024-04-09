@@ -1,21 +1,21 @@
 import mongoose from "mongoose";
+import { Resource } from "sst";
+
+
+
 
 // Once we connect to the database once, we'll store that connection
 // and reuse it so that we don't have to connect to the database on every request.
 let cachedDb: typeof mongoose | null = null;
 
 const createMongoDbURI = () => {
-  const mongoDbUri = process.env.MONGODB_URI;
-  const username = process.env.MONGODB_USERNAME;
-  const password = process.env.MONGODB_PASSWORD;
-  console.log({ mongoDbUri, username, password });
-  //our mongouri is like =mongodb+srv://<username>:<password>@xvault.i8zmvny.mongodb.net/?retryWrites=true&w=majority&appName=XVault
-  // we need to remove the placeholder username and password and replace them with the actual values
-  const mongoDbUriWithoutUsernameAndPassword = mongoDbUri
-    .replace(`<username>`, username)
-    .replace(`<password>`, password);
+  const mongoDbPassword = Resource.XMongoDBPassword.value;
+  const mongoDbUsername = Resource.XMongoDBUsername.value;
+  const mongoDbDatabase = Resource.XMongoDBDatabase.value;
+  const mongoDbHost = Resource.XMongoDBHost.value;
 
-  console.log({ mongoDbUriWithoutUsernameAndPassword });
+  // we need to create a mongoDbUri like: mongodb://username:password@localhost:27017/mydatabase?retryWrites=true&w=majority
+  const mongoDbUriWithoutUsernameAndPassword = `mongodb+srv://${mongoDbUsername}:${mongoDbPassword}@${mongoDbHost}/${mongoDbDatabase}?retryWrites=true&w=majority&ssl=true`;
   return mongoDbUriWithoutUsernameAndPassword;
 };
 
@@ -25,14 +25,12 @@ export const connectToDatabase = async () => {
   }
 
   try {
-    console.log("Connecting to database");
     const db = await mongoose.connect(createMongoDbURI());
     cachedDb = db;
-    console.log("Connected to database");
+ 
 
     return db;
   } catch (error) {
-    console.error("Error connecting to database:", error);
     throw error;
   }
 };
@@ -51,11 +49,6 @@ const userSchema = new mongoose.Schema({
 });
 
 const tweetSchema = new mongoose.Schema({
-  // userId: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: "User",
-  //   required: true,
-  // },
   tweetId: {
     type: String,
     required: true,
@@ -69,8 +62,9 @@ const tweetSchema = new mongoose.Schema({
     required: true,
   },
   isThread: {
-    type: Boolean,
-    required: true,
+    type: mongoose.Schema.Types.Boolean,
+    default: false,
+    required:false
   },
   threadId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -81,6 +75,7 @@ const tweetSchema = new mongoose.Schema({
   replyToTweetId: {
     type: String,
     default: null,
+    required: false
   },
   createdAt: {
     type: Date,

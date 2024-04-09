@@ -35,13 +35,13 @@ function TweetItem({
   tweet,
 }: {
   tweet: {
-    tweetId: string;
     content: string;
+    tweetId: string;
     author_username: string;
-    isThread: boolean;
-    replyToTweetId: string;
     createdAt: string;
+    isThread?: boolean | null | undefined;
     threadId?: string | null | undefined;
+    replyToTweetId?: string | null | undefined;
   };
 }) {
   return (

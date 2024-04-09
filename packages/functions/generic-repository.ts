@@ -1,4 +1,4 @@
-import mongoose, { FilterQuery } from "mongoose";
+import mongoose, { FilterQuery, UpdateQuery } from "mongoose";
 import { z } from "zod";
 
 const querySchema = z.record(z.string(), z.union([z.string(), z.number()]));
@@ -145,11 +145,11 @@ export class GenericRepository<T> {
     return await this.model.findOne(query);
   }
 
-  async createOne(data: T): Promise<T> {
+  async createOne(data: T){
     return await this.model.create(data);
   }
 
-  async updateOne(id: string, data: T): Promise<T> {
+  async updateOne(id: string, data: UpdateQuery<T>){
     return await this.model.findByIdAndUpdate(id, data);
   }
 

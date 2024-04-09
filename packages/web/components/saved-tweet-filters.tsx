@@ -18,6 +18,7 @@ export function SavedTweetFilters() {
     (name: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString());
       params.set(name, value);
+      params.set("page", "1");
 
       return params.toString();
     },

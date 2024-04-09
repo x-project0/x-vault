@@ -6,12 +6,11 @@ import { prettyJSON } from "hono/pretty-json";
 import { logger } from "hono/logger";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { GenericRepository } from "./generic-repository";
+import { GenericRepository } from "./generic-repository.js";
 import mongoose from "mongoose";
 
 const tweetRepository = new GenericRepository(Tweet);
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 type Bindings = {
   event: LambdaEvent;
@@ -38,7 +37,6 @@ const app = new Hono<{ Bindings: Bindings }>()
       page,
       sort,
     } = c.req.query();
-    console.log(c.req.query());
 
     // We will use the query parameters to find the tweet in the database
     const tweets = await tweetRepository.getAll({

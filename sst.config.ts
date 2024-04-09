@@ -14,6 +14,11 @@ export default $config({
     };
   },
   async run() {
+    const MONGODB_PASSWORD = new sst.Secret("XMongoDBPassword");
+    const MONGODB_USERNAME = new sst.Secret("XMongoDBUsername");
+    const MONGODB_DATABASE = new sst.Secret("XMongoDBDatabase");
+    const MONGODB_HOST = new sst.Secret("XMongoDBHost");
+    
     const bucket = new sst.aws.Bucket("XVaultBucketWeb", {
       public: true,
     });
@@ -27,11 +32,7 @@ export default $config({
     const tweetHonoHandler = new sst.aws.Function("TweetHandler", {
       handler: "./packages/functions/tweet.handler",
       url: true,
-      environment: {
-        MONGODB_URI: process.env.MONGODB_URI,
-        MONGODB_PASSWORD: process.env.MONGODB_PASSWORD,
-        MONGODB_USERNAME: process.env.MONGODB_USERNAME,
-      },
+      link: [MONGODB_PASSWORD, MONGODB_USERNAME, MONGODB_DATABASE, MONGODB_HOST],
     });
 
     const bookHonoHandler = new sst.aws.Function("BookHandler", {
