@@ -60,20 +60,34 @@ export function SavedTweetPaginationFooter({
     <div className="flex justify-end items-center">
       <Pagination>
         <PaginationContent>
-          <PaginationLink
-            href={`${pathname}?page=1`}
-            isActive={currentPage === 1}
-            className={currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}
-          >
-            <ChevronsLeft className="h-4 w-4" />
-          </PaginationLink>
-          <PaginationLink
-            href={`${pathname}?page=${currentPage === 1 ? 1 : currentPage - 1}`}
-            isActive={currentPage === 1}
-            className={currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </PaginationLink>
+          {currentPage > 1 && (
+            <PaginationLink
+              href={`${pathname}?page=1`}
+              isActive={currentPage === 1}
+              aria-disabled={currentPage <= 1}
+              tabIndex={currentPage <= 1 ? -1 : undefined}
+              className={
+                currentPage <= 1 ? "pointer-events-none opacity-50" : undefined
+              }
+            >
+              <ChevronsLeft className="h-4 w-4" />
+            </PaginationLink>
+          )}
+          {currentPage > 1 && (
+            <PaginationLink
+              href={`${pathname}?page=${
+                currentPage === 1 ? 1 : currentPage - 1
+              }`}
+              isActive={currentPage === 1}
+              aria-disabled={currentPage <= 1}
+              tabIndex={currentPage <= 1 ? -1 : undefined}
+              className={
+                currentPage <= 1 ? "pointer-events-none opacity-50" : undefined
+              }
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </PaginationLink>
+          )}
 
           {/* Ellipsis and page numbers */}
           {getPageNumbers().map((pageNumber, index) => (
@@ -100,6 +114,8 @@ export function SavedTweetPaginationFooter({
             <PaginationLink
               href={`${pathname}?page=${currentPage + 1}`}
               isActive={currentPage === currentPage + 1}
+              aria-disabled={currentPage === totalPages}
+              tabIndex={currentPage === totalPages ? -1 : undefined}
             >
               <ChevronRight className="h-4 w-4" />
             </PaginationLink>
@@ -108,6 +124,8 @@ export function SavedTweetPaginationFooter({
             <PaginationLink
               href={`${pathname}?page=${totalPages}`}
               isActive={currentPage === totalPages}
+              aria-disabled={currentPage === totalPages}
+              tabIndex={currentPage === totalPages ? -1 : undefined}
             >
               <ChevronsRight className="h-4 w-4" />
             </PaginationLink>
