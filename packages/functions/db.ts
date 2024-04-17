@@ -48,12 +48,37 @@ const userSchema = new mongoose.Schema({
   updatedAt: Date,
 });
 
-const tweetSchema = new mongoose.Schema({
+const chunkSchema = new mongoose.Schema({
   tweetId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Tweet",
+    required: false,
+  },
+  content: {
     type: String,
     required: true,
   },
-  content: {
+  embedding: [Number],
+  metadata: {
+    type: Object,
+    required: false,
+    loc: {
+      type: Object,
+      required: false,
+      lines: {
+        type: Object,
+        required: false,
+        to: Number,
+        from: Number,
+      },
+    },
+  },
+});
+
+
+
+const tweetSchema = new mongoose.Schema({
+  tweetId: {
     type: String,
     required: true,
   },
@@ -64,26 +89,36 @@ const tweetSchema = new mongoose.Schema({
   isThread: {
     type: mongoose.Schema.Types.Boolean,
     default: false,
-    required:false
+    required: false,
   },
   threadId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Tweet",
     default: null,
-    required: false
+    required: false,
   },
   replyToTweetId: {
     type: String,
     default: null,
-    required: false
+    required: false,
   },
   createdAt: {
     type: Date,
     default: Date.now,
   },
+  chunks: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Chunk",
+  }]
 });
 
 export const Tweet = mongoose.model("Tweet", tweetSchema);
-export type Tweet = mongoose.InferSchemaType<typeof tweetSchema>;
+export type Tweet = mongoose.InferSchemaType<typeof tweetSchema> & {
+  _id: mongoose.Types.ObjectId;
+};
+export const Chunk = mongoose.model("Chunk", chunkSchema);
+export type Chunk = mongoose.InferSchemaType<typeof chunkSchema> & {
+  _id: mongoose.Types.ObjectId;
+};
 
 export const User = mongoose.model("User", userSchema);

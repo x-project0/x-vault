@@ -149,7 +149,11 @@ export class GenericRepository<T> {
     return await this.model.create(data);
   }
 
-  async updateOne(id: string, data: UpdateQuery<T>){
+  async create(data: T) {
+    return await this.model.create(data);
+  }
+
+  async updateOne(id: string, data: UpdateQuery<T>) {
     return await this.model.findByIdAndUpdate(id, data);
   }
 
@@ -160,9 +164,12 @@ export class GenericRepository<T> {
 
     const result = (await this.model.aggregate<T>(
       aggregations
-    )) as unknown as Array<{ total: Array<{
-      count: number;
-    }>; docs: T[] }>;
+    )) as unknown as Array<{
+      total: Array<{
+        count: number;
+      }>;
+      docs: T[];
+    }>;
     const total = result[0]?.total?.[0]?.count || 0;
     const docs = result[0].docs;
     return { total, docs };
