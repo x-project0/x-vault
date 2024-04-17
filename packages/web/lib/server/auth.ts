@@ -46,6 +46,7 @@ export const authConfig = {
     maxAge: 2 * 24 * 60 * 60,
   },
   //   pages: { signIn: "/" },
+  trustHost: true,
   callbacks: {
     session: async ({ session, token }) => {
       if (token?.sub) {
