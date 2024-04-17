@@ -1,7 +1,8 @@
-
 import { MainNav } from "@/components/main-nav";
 import { MobileNav } from "@/components/mobile-nav";
 import { ModeToggle } from "@/components/mode-toggle";
+import { SignedIn, signOut } from "@/lib/server";
+import { SignOutButton } from "./sign-out-button";
 
 export function SiteHeader() {
   return (
@@ -10,9 +11,12 @@ export function SiteHeader() {
         <MainNav />
         <MobileNav />
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-         
           <nav className="flex items-center">
-        
+            <SignedIn>
+              {({ user }) => (
+                <SignOutButton user={user} />
+              )}
+            </SignedIn>
             <ModeToggle />
           </nav>
         </div>

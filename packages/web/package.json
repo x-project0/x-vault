@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/mongodb-adapter": "^2.6.0",
     "@aws-sdk/client-s3": "^3.540.0",
     "@aws-sdk/s3-request-presigner": "^3.540.0",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -23,10 +24,14 @@
     "clsx": "^2.1.0",
     "hono": "^4.2.2",
     "lucide-react": "^0.363.0",
+    "mongodb": "^6.5.0",
+    "mongoose": "^8.3.1",
     "next": "14.1.4",
+    "next-auth": "^5.0.0-beta.16",
     "next-themes": "^0.3.0",
     "react": "^18",
     "react-dom": "^18",
+    "react-error-boundary": "^4.0.13",
     "sst": "^3.0.4",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",

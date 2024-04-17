@@ -1,6 +1,4 @@
 import { SavedTweets } from "@/components/saved-tweets";
-import { SavedTweetsSkeleton } from "@/components/saved-tweets-skeleton";
-import { Suspense } from "react";
 
 export default async function BookmarksPage({
   searchParams,

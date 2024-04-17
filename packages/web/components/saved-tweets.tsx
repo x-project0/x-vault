@@ -30,33 +30,96 @@ import {
 } from "./ui/pagination";
 import { usePathname } from "next/navigation";
 import { SavedTweetPaginationFooter } from "./saved-tweet-pagination-footer";
+import { ErrorBoundary } from "react-error-boundary";
+type Chunk = {
+  content: string;
+  embedding: number[];
+  tweetId?: string | null | undefined;
+  metadata?: any;
+  _id: string;
+};
 
-function TweetItem({
-  tweet,
+type Tweet = {
+  tweetId: string;
+  author_username: string;
+  createdAt: string;
+  chunks: Array<string>;
+  isThread?: boolean | null | undefined;
+  threadId?: string | null | undefined;
+  replyToTweetId?: string | null | undefined;
+  _id: string;
+};
+function TweetChunkItem({
+  chunk,
 }: {
-  tweet: {
+  chunk: {
     content: string;
-    tweetId: string;
-    author_username: string;
-    createdAt: string;
-    isThread?: boolean | null | undefined;
-    threadId?: string | null | undefined;
-    replyToTweetId?: string | null | undefined;
+    embedding: number[];
+    tweetId?: string | null | undefined;
+    metadata?: any;
+    _id: string;
+    score: number;
+    tweet: Tweet;
+    chunks: Chunk[];
   };
 }) {
   return (
     <div className="flex items-start gap-4">
+      {/* Avatar Section (no changes needed) */}
       <div className="flex-shrink-0">
         <Avatar className="w-12 h-12">
           <AvatarImage alt="@johndoe" src="/placeholder-avatar.jpg" />
           <AvatarFallback>AC</AvatarFallback>
         </Avatar>
       </div>
-      <div className="border rounded-lg p-4 w-full">
-        <p className="text-lg font-medium">{tweet.author_username}</p>
-        <p className="text-gray-600">@{tweet.author_username}</p>
-        <p>{tweet.content}</p>
+
+      {/* Tweet Content Section (improved styles) */}
+      <div className="border rounded-lg p-4 w-full bg-white dark:bg-zinc-900">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-lg font-medium">{chunk.tweet.author_username}</p>
+            <p className="text-gray-600 dark:text-gray-400">
+              @{chunk.tweet.author_username}
+            </p>
+          </div>
+            {/* score */}
+            <span className="inline-block rounded-md px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-300 dark:text-gray-900">
+              Score: {chunk.score.toFixed(2)}
+            </span>
+        </div>
+
+        <p>
+          {chunk.chunks.map((chunk_part, index) => (
+            <span
+              key={index}
+              className={`
+                inline-block
+                rounded-md
+                px-2 py-1
+                ${
+                  chunk._id === chunk_part._id
+                    ? "bg-yellow-100 text-gray-800 font-semibold dark:bg-yellow-300 dark:text-gray-900"
+                    : "dark:text-gray-300"
+                }
+              `}
+            >
+              {chunk_part.content}
+              {index !== chunk.chunks.length - 1 && <br />}
+            </span>
+          ))}
+        </p>
       </div>
+    </div>
+  );
+}
+
+function ErrorCard() {
+  return (
+    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative text-center">
+      <strong className="font-bold">
+        An unexpected error occurred while processing your request. You can try
+          changing your search term or contact support.
+      </strong>
     </div>
   );
 }
@@ -68,36 +131,27 @@ async function SavedTweetResults({
 }) {
   noStore();
 
-  const res = await client.tweet.v1.$get({
+  const res = await client.tweet.v1.embeddings.$get({
     query: {
-      limit: params.limit || 10,
-      page: params.page || 1,
-      ...(params.search ? { author_username: `$like:${params.search}` } : {}),
+      limit: String(params.limit || 10),
+      search: params.search!,
+      // ...(params.search ? { author_username: `$like:${params.search}` } : {}),
     },
   });
 
   const data = await res.json();
+
   return match(data)
     .with(
       {
         data: P.nonNullable,
       },
       ({ data }) => {
-        return Array.isArray(data.docs) && data.docs.length > 0 ? (
+        return Array.isArray(data) && data.length > 0 ? (
           <div className="flex flex-col gap-4">
-            {data.docs.map((tweet) => (
-              <TweetItem key={tweet.tweetId} tweet={tweet} />
+            {data.map((chunk) => (
+              <TweetChunkItem key={chunk._id} chunk={chunk} />
             ))}
-            <div className="flex justify-center items-center">
-              <SavedTweetPaginationFooter
-                totalPages={
-                  params.limit
-                    ? Math.ceil(data.total / Number(params.limit))
-                    : Math.ceil(data.total / 10)
-                }
-                currentPage={Number(params.page) || 1}
-              />
-            </div>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center">
@@ -121,7 +175,12 @@ async function SavedTweetResults({
       },
       ({ error }) => {
         return (
-          <p className="text-center text-sm text-muted-foreground">{error}</p>
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md relative text-center">
+            <strong className="font-bold">
+              An error occurred while processing your request. You can try
+              changing your search term or contact support.
+            </strong>
+          </div>
         );
       }
     )
@@ -150,7 +209,11 @@ export function SavedTweets({
     <section key="1" className="flex flex-1 flex-col gap-4 p-6">
       <div className="flex items-center justify-between flex-col">
         <h1 className="text-2xl text-center font-semibold mb-4">
-          Tweets Saved
+          Tweets Saved&nbsp;
+          {/* Sparkles emoji */}AI&nbsp;
+          <span role="img" aria-label="sparkles">
+            ✨
+          </span>
         </h1>
         <p className="text-center text-sm text-muted-foreground">
           These are the tweets you have saved in your collection.
@@ -158,6 +221,10 @@ export function SavedTweets({
       </div>
       <SavedTweetFilters />
       <div className="border rounded-lg p-6 flex flex-col gap-6">
+        <ErrorBoundary
+        fallback={<ErrorCard />}
+        >
+
         <Suspense
           fallback={<SavedTweetsSkeleton />}
           // This is a hack to make the component re-render the fallback when the search param changes,
@@ -166,7 +233,7 @@ export function SavedTweets({
         >
           <SavedTweetResults params={params} />
         </Suspense>
-
+        </ErrorBoundary>
         <div className="grid grid-cols-1 gap-4"></div>
         {/* <div className="border-t pt-4">
           <h2 className="text-lg font-semibold mb-2">Add tweet</h2>
