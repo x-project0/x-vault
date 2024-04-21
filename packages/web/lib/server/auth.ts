@@ -49,6 +49,7 @@ export const authConfig = {
   trustHost: true,
   callbacks: {
     session: async ({ session, token }) => {
+      console.log('Calling session callback');
       if (token?.sub) {
         session.user.id = token.sub;
       }
